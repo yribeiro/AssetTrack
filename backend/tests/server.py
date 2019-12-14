@@ -54,7 +54,7 @@ class BackendServer:
             # sleep to give the server time to kill requests
             time.sleep(1)
             if self._thread.is_alive():
-                print("Error: Server Thread did not shutdown cleanly")
+                raise OSError("Server Thread did not shutdown cleanly")
             else:
                 print("BackendServer successfully shutdown")
         else:
