@@ -1,8 +1,10 @@
 import time
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from gevent.pywsgi import WSGIServer
 from threading import Thread
+
+from backend.datastore import InMemoryDataStore
 
 
 class BackendServer:
@@ -26,6 +28,16 @@ class BackendServer:
         @app.route("/")
         def index():
             return "WebApp Index"
+
+        @app.route("/api/add_user", methods=["POST"])
+        def add_user():
+            store = InMemoryDataStore()
+            user_json = request.get_json(force=True)
+            store.add_user(
+                firstname=user_json["firstname"], lastname=user_json["lastname"],
+                age=user_json["age"], email=user_json["email"]
+            )
+            return jsonify("Success")
 
         return app
 

@@ -1,3 +1,5 @@
+import sys
+
 from typing import List
 from threading import Lock
 
@@ -20,4 +22,4 @@ class InMemoryDataStore:
             else:
                 u = User(firstname, lastname, age, email)
                 self._USERS.append(u)
-                print(f"Added new user {u.first_name} {u.last_name}")
+                print(f"Added new user {u.first_name} {u.last_name}", file=sys.stdout)
