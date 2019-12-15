@@ -5,6 +5,9 @@ import uuid
 
 
 class Currencies(enum.Enum):
+    """
+    Valid currencies to create portfolios with.
+    """
     GBP = 1
     USD = 2
     EUR = 3
