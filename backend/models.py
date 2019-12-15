@@ -3,6 +3,8 @@ import os
 import pickle
 import uuid
 
+from datetime import datetime
+
 
 class Currencies(enum.Enum):
     """
@@ -185,7 +187,30 @@ class Portfolio:
     Based on: https://www.schwabmoneywise.com/public/file/P-4038856/Net-Worth-Worksheet.pdf
     """
 
-    def __init__(self, currency):
+    def __init__(
+            self, currency: Currencies, cash_assets: CashAssets, invested_assets: InvestedAssets,
+            use_assets: UseAssets, current_liabilities: CurrentLiabilities, long_term_liabilities: LongTermLiabilities,
+            timestamp=datetime.now()
+    ):
         if not isinstance(currency, Currencies):
             raise ValueError("Expected type Currencies")
+
         self.currency = currency
+        self.cash_assets = cash_assets
+        self.invested_assets = invested_assets
+        self.use_assets = use_assets
+        self.current_liabilities = current_liabilities
+        self.long_term_liabilities = long_term_liabilities
+        self.timestamp = timestamp  # this may be overwritten
+
+    @property
+    def total_assets(self):
+        return self.cash_assets.total + self.invested_assets.total + self.use_assets.total
+
+    @property
+    def total_liabilities(self):
+        return self.current_liabilities.total + self.long_term_liabilities.total
+
+    @property
+    def net_worth(self):
+        return self.total_assets - self.total_liabilities
