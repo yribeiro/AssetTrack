@@ -36,13 +36,22 @@ class InMemoryDataStore:
                 print(f"Added new user {u.first_name} {u.last_name}", file=sys.stdout)
 
     @staticmethod
-    def save_to_disk():
+    def save_to_disk(loc: str = STORAGE_PATH):
         """
         Function to persist the data storage to disk. Stored in the backend storage
         area.
         """
-        file_path = os.path.join(STORAGE_PATH, "users.pck")
+        file_path = os.path.join(loc, "users.pck")
         with open(file_path, "wb") as fp:
             pickle.dump(InMemoryDataStore._USERS, fp)
 
         print(f"Saved all users to file: {file_path}")
+
+    @staticmethod
+    def clear():
+        """
+        Function to clear the contents of the in memory storage.
+        """
+        print("Warning: clearing contents of in memory storage")
+        with InMemoryDataStore._USERS_LOCK:
+            InMemoryDataStore._USERS.clear()

@@ -11,14 +11,15 @@ class TestInMemoryDataStore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.TEST_STORAGE_PATH = os.path.join(os.getcwd(), "test_storage")
-        if not os.path.isdir(cls.TEST_STORAGE_PATH):
-            os.makedirs(cls.TEST_STORAGE_PATH)
-
         # load and save some dummy data
         cls.TEST_USER = User("John", "Doe", 23, "john.doe@gmail.com")
 
-        with open(os.path.join(cls.TEST_STORAGE_PATH, "users.pck"), "wb") as fp:
-            pickle.dump([cls.TEST_STORAGE_PATH], fp)
+    def setUp(self):
+        if not os.path.isdir(self.TEST_STORAGE_PATH):
+            os.makedirs(self.TEST_STORAGE_PATH)
+
+        with open(os.path.join(self.TEST_STORAGE_PATH, "users.pck"), "wb") as fp:
+            pickle.dump([self.TEST_USER], fp)
 
     def tearDown(self):
         if os.path.isdir(self.TEST_STORAGE_PATH):
@@ -27,11 +28,50 @@ class TestInMemoryDataStore(unittest.TestCase):
 
             os.rmdir(self.TEST_STORAGE_PATH)
 
+        # clear the contents after a test
+        InMemoryDataStore.clear()
+
     def test_datastore_loads_pck_file(self):
-        pass
+        InMemoryDataStore(users_pck_file=os.path.join(
+            self.TEST_STORAGE_PATH, "users.pck"
+        ))
+
+        self.assertEqual(InMemoryDataStore._USERS[0].first_name, self.TEST_USER.first_name)
+        self.assertEqual(InMemoryDataStore._USERS[0].last_name, self.TEST_USER.last_name)
+        self.assertEqual(InMemoryDataStore._USERS[0].age, self.TEST_USER.age)
+        self.assertEqual(InMemoryDataStore._USERS[0].email, self.TEST_USER.email)
 
     def test_datastore_add_user(self):
-        pass
+        # create store with default data
+        store = InMemoryDataStore(users_pck_file=os.path.join(self.TEST_STORAGE_PATH, "users.pck"))
+
+        # add a new user
+        store.add_user("Jane", "Doe", 18, "jane.doe@gmail.com")
+        self.assertEqual(InMemoryDataStore._USERS[1].email, "jane.doe@gmail.com")
+
+        # add an existing email
+        with self.assertRaises(ValueError):
+            store.add_user(
+                self.TEST_USER.first_name, self.TEST_USER.last_name,
+                self.TEST_USER.age, self.TEST_USER.email
+            )
 
     def test_datastore_persists_to_disk(self):
-        pass
+        users_file = os.path.join(self.TEST_STORAGE_PATH, "users.pck")
+        # get contents of the current file
+        with open(users_file, "rb") as fp:
+            orig_users = pickle.load(fp)
+
+        # create store and populate with file, then add user
+        store = InMemoryDataStore(users_pck_file=users_file)
+        store.add_user("Jane", "Doe", 18, "jane.doe@gmail.com")
+
+        # persist to disk
+        store.save_to_disk(loc=self.TEST_STORAGE_PATH)
+
+        # get contents and check that list is appended
+        with open(users_file, "rb") as fp:
+            new_users = pickle.load(fp)
+
+        self.assertGreater(len(new_users), len(orig_users))
+
