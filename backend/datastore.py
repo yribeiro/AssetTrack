@@ -6,7 +6,7 @@ from typing import List
 from threading import Lock
 
 from backend import STORAGE_PATH
-from backend.models import User
+from backend.models import User, Portfolio
 
 
 class InMemoryDataStore:
@@ -29,11 +29,21 @@ class InMemoryDataStore:
     def add_user(firstname: str, lastname: str, age: int, email: str):
         with InMemoryDataStore._USERS_LOCK:
             if list(filter(lambda user: user.email == email, InMemoryDataStore._USERS)):
-                raise ValueError("This email address has already been registered")
+                raise ValueError(f"This email '{email}' has already been registered")
             else:
                 u = User(firstname, lastname, age, email)
                 InMemoryDataStore._USERS.append(u)
                 print(f"Added new user {u.first_name} {u.last_name}", file=sys.stdout)
+
+    @staticmethod
+    def update_user_portfolio(email: str, portfolio: Portfolio):
+        with InMemoryDataStore._USERS_LOCK:
+            # passed by pointer
+            found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
+            if found_user:
+                found_user[0].portfolio = portfolio
+            else:
+                raise ValueError(f"There is no registered user with the email: {email}")
 
     @staticmethod
     def save_to_disk(loc: str = STORAGE_PATH):

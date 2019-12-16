@@ -5,6 +5,8 @@ from gevent.pywsgi import WSGIServer
 from threading import Thread
 
 from backend.datastore import InMemoryDataStore
+from backend.models import CashAssets, UseAssets, InvestedAssets, Other, Portfolio
+from backend.models import Currencies, CurrentLiabilities, LongTermLiabilities
 
 
 class BackendServer:
@@ -39,6 +41,56 @@ class BackendServer:
             )
             return jsonify("Success")
 
+        @app.route("/api/update_user_portfolio", methods=["POST"])
+        def update_user_portfolio():
+            store = InMemoryDataStore()
+            json_data = request.get_json(force=True)
+
+            cash_json = json_data["cashAssets"]
+            cash = CashAssets(
+                cash_json["cashAssets"], cash_json["savingsAcs"], cash_json["moneyMarketAccounts"],
+                cash_json["savingsBonds"], cash_json["cds"], cash_json["lifeInsurance"],
+                Other(cash_json["other"]["title"], cash_json["other"]["amount"])
+            )
+
+            invested_json = json_data["investedAssets"]
+            invested = InvestedAssets(
+                invested_json["brokerage"],
+                Other(invested_json["otherTax"]["title"], invested_json["otherTax"]["amount"]),
+                invested_json["ira"], invested_json["rothIra"], invested_json["k401"], invested_json["sepIra"],
+                invested_json["keogh"], invested_json["pension"], invested_json["annuity"], invested_json["realEstate"],
+                invested_json["soleProp"], invested_json["partnership"], invested_json["cCorp"], invested_json["sCorp"],
+                invested_json["limitedLiabilityCompany"],
+                Other(invested_json["otherBusiness"]["title"], invested_json["otherBusiness"]["amount"])
+            )
+
+            use_json = json_data["useAssets"]
+            use = UseAssets(
+                use_json["principalHome"], use_json["vacationHome"], use_json["vehicles"],
+                use_json["homeFurnishings"], use_json["artsAntiques"], use_json["jewelryFurs"],
+                Other(use_json["other"]["title"], use_json["other"]["amount"])
+            )
+
+            current_json = json_data["currentLiabilities"]
+            current = CurrentLiabilities(
+                current_json["creditCardBalance"], current_json["incomeTaxOwed"],
+                Other(current_json["other"]["title"], current_json["other"]["amount"])
+            )
+
+            long_json = json_data["longTermLiabilities"]
+            long = LongTermLiabilities(
+                long_json["homeMortgage"], long_json["homeEquityLoan"], long_json["rentPropertyMortgage"],
+                long_json["carLoans"], long_json["studentLoans"], long_json["lifeInsurancePolicy"],
+                Other(long_json["other"]["title"], long_json["other"]["amount"])
+            )
+
+            currency = Currencies[json_data["currency"]]
+            email = json_data["email"]
+
+            store.update_user_portfolio(
+                email=email, portfolio=Portfolio(currency, cash, invested, use, current, long)
+            )
+
         return app
 
     def _run_server(self):
@@ -71,10 +123,3 @@ class BackendServer:
                 print("BackendServer successfully shutdown")
         else:
             print("The BackendServer is already shutdown")
-
-
-if __name__ == "__main__":
-    server = BackendServer("localhost", 5000)
-    server.start()
-    _ = input("Hit enter to kill ... ")
-    server.stop()
