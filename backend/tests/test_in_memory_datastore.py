@@ -90,4 +90,16 @@ class TestInMemoryDataStore(unittest.TestCase):
             ))
 
     def test_update_user_portfolio_persists_change(self):
-        pass
+        cash, use, invested, current, long = utils.get_test_assets_and_liabilities()
+        p = Portfolio(Currencies.GBP, cash, invested, use, current, long)
+        users_file = os.path.join(self.TEST_STORAGE_PATH, "users.pck")
+
+        store = InMemoryDataStore(users_pck_file=users_file)
+        self.assertIsNone(None, InMemoryDataStore._USERS[0].portfolio)
+
+        store.update_user_portfolio("john.doe@gmail.com", p)
+        self.assertEqual(Currencies.GBP, InMemoryDataStore._USERS[0].portfolio.currency)
+
+        p.currency = Currencies.USD
+        store.update_user_portfolio("john.doe@gmail.com", p)
+        self.assertEqual(Currencies.USD, InMemoryDataStore._USERS[0].portfolio.currency)
