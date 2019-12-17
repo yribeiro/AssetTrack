@@ -2,8 +2,10 @@ import os
 import pickle
 import unittest
 
+import utils
+
 from backend.datastore import InMemoryDataStore
-from backend.models import User
+from backend.models import User, Portfolio, Currencies
 
 
 class TestInMemoryDataStore(unittest.TestCase):
@@ -74,4 +76,18 @@ class TestInMemoryDataStore(unittest.TestCase):
             new_users = pickle.load(fp)
 
         self.assertGreater(len(new_users), len(orig_users))
+        self.assertIsNone(new_users[1].portfolio)
 
+    def test_update_user_portfolio_raises_error_for_invalid_user(self):
+        users_file = os.path.join(self.TEST_STORAGE_PATH, "users.pck")
+        store = InMemoryDataStore(users_file)
+
+        cash, use, invested, current, long = utils.get_test_assets_and_liabilities()
+
+        with self.assertRaises(ValueError):
+            store.update_user_portfolio("test.email@email.com", Portfolio(
+                Currencies.GBP, cash, invested, use, current, long
+            ))
+
+    def test_update_user_portfolio_persists_change(self):
+        pass

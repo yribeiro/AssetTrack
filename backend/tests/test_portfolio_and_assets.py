@@ -1,26 +1,20 @@
 import time
 import unittest
 
+import utils
+
 from datetime import datetime
 
-from backend.models import Currencies, Other
-from backend.models import CashAssets, UseAssets, InvestedAssets
-from backend.models import CurrentLiabilities, LongTermLiabilities
+from backend.models import Currencies
 from backend.models import Portfolio
 
 
 class TestPortfolioAndAssetLiabilities(unittest.TestCase):
     def setUp(self):
-        self.cash = CashAssets(1, 2, 3, 4, 5, 6, Other("Test", 7))
-        self.use = UseAssets(10, 20, 30, 40, 50, 60, Other("TestUse", 70))
-        self.invested = InvestedAssets(
-            1.5, Other("TestInvest", 2.5), 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,
-            11.5, 12.5, 13.5, 14.5, 15.5, Other("TestInvest", 16.5)
-        )
-        self.current = CurrentLiabilities(0, 1.1, Other("TestCurrent", 1.3))
-        self.long = LongTermLiabilities(10, 20, 30, 40, 50, 60, Other(amount=70))
+        self.cash, self.use, self.invested, self.current, self.long = utils.get_test_assets_and_liabilities()
 
         # set the totals manually to check the underlying cash / asset later
+        # see utils file for values
         self.assets = 1 + 2 + 3 + 4 + 5 + 6 + 7
         self.assets += 10 + 20 + 30 + 40 + 50 + 60 + 70
         self.assets += 1.5 + 2.5 + 3.5 + 4.5 + 5.5 + 6.5 + 7.5 + 8.5 + 9.5 + 10.5

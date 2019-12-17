@@ -2,6 +2,8 @@ import os
 import pickle
 import unittest
 
+import utils
+
 from backend.models import User
 
 
@@ -13,14 +15,14 @@ class TestUserClass(unittest.TestCase):
                 os.remove(os.path.join(os.getcwd(), file))
 
     def test_user_can_be_created(self):
-        u = self._create_test_user()
+        u = utils.get_test_user()
         self.assertEqual(u.first_name, "Yohahn")
         self.assertEqual(u.last_name, "Ribeiro")
         self.assertEqual(u.age, 25)
         self.assertEqual(u.email, "yohahnribeiro29@gmail.com")
 
     def test_user_is_persisted_to_disk_at_location(self):
-        u = self._create_test_user()
+        u = utils.get_test_user()
         u.save_to_disk(os.getcwd())
 
         # check that a pickle file has been saved
@@ -36,11 +38,3 @@ class TestUserClass(unittest.TestCase):
         self.assertEqual(u.last_name, u2.last_name)
         self.assertEqual(u.age, u2.age)
         self.assertEqual(u.email, u2.email)
-
-    @staticmethod
-    def _create_test_user() -> User:
-        fname = "Yohahn"
-        lname = "Ribeiro"
-        age = 25
-        email = "yohahnribeiro29@gmail.com"
-        return User(fname, lname, age, email)
