@@ -3,10 +3,23 @@ import socket
 import time
 import unittest
 
+try:
+    from . import utils
+except ImportError:
+    import utils
+
 from backend.server import BackendServer
+from backend.datastore import InMemoryDataStore
+from backend.models import Currencies
 
 
 class TestBackendServer(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # add to the datastore
+        store = InMemoryDataStore()
+        store.add_user("John", "Doe", 23, "john.doe@gmail.com")
+
     def setUp(self):
         self.host = "localhost"
         self.port = 50123
@@ -54,11 +67,12 @@ class TestBackendServer(unittest.TestCase):
         self.assertEqual(resp.status_code, 405)
 
         # make valid request as post with user data
+        u = utils.get_test_user()
         resp = requests.post(
             f"http://{self.host}:{self.port}/api/add_user",
             json={
-                "firstname": "Yohahn", "lastname": "Ribeiro",
-                "age": 25, "email": "  yohahnribeiro29@gmail.com"
+                "firstname": u.first_name, "lastname": u.last_name,
+                "age": u.age, "email": u.email
             }
         )
         self.assertEqual(resp.status_code, 200)
@@ -67,10 +81,54 @@ class TestBackendServer(unittest.TestCase):
         resp = requests.post(
             f"http://{self.host}:{self.port}/api/add_user",
             json={
-                "firstname": "Yohahn", "lastname": "Ribeiro",
-                "age": 25, "email": "  yohahnribeiro29@gmail.com"
+                "firstname": u.first_name, "lastname": u.last_name,
+                "age": u.age, "email": u.email
             }
         )
         self.assertEqual(500, resp.status_code)
 
         server.stop()
+
+    def test_server_update_user_portfolio_endpoint(self):
+        server = BackendServer(host=self.host, port=self.port)
+        server.start()
+        time.sleep(1)  # sleep to allow server to start
+
+        # make a request on the end point as get
+        resp = requests.get(f"http://{self.host}:{self.port}/api/update_user_portfolio")
+        self.assertEqual(resp.status_code, 405)
+
+        # make valid request to the endpoint
+        json_data = dict()
+        json_data["currency"] = Currencies.GBP.name
+        json_data["email"] = "john.doe@gmail.com"
+
+        # generate asset and liabilities data
+        cash, use, invested, current, long = utils.get_test_assets_and_liabilities()
+
+        # cash Assets
+        vals = {utils.to_camel_case(k): v for k, v in cash.__dict__.items()}
+        vals["other"] = cash.other.__dict__
+        json_data["cashAssets"] = vals
+
+        # use Assets
+        vals = {utils.to_camel_case(k): v for k, v in use.__dict__.items()}
+        vals["other"] = use.other.__dict__
+        json_data["useAssets"] = vals
+
+        # invested Assets
+        vals = {utils.to_camel_case(k): v for k, v in invested.__dict__.items()}
+        vals["otherTax"] = invested.other_tax.__dict__
+        vals["otherBusiness"] = invested.other_business.__dict__
+        json_data["investedAssets"] = vals
+
+        vals = {utils.to_camel_case(k): v for k, v in current.__dict__.items()}
+        vals["other"] = current.other.__dict__
+        json_data["currentLiabilities"] = vals
+
+        vals = {utils.to_camel_case(k): v for k, v in long.__dict__.items()}
+        vals["other"] = long.other.__dict__
+        json_data["longTermLiabilities"] = vals
+
+        resp = requests.post(f"http://{self.host}:{self.port}/api/update_user_portfolio", json=json_data)
+        self.assertEqual(resp.status_code, 200)

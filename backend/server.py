@@ -48,7 +48,7 @@ class BackendServer:
 
             cash_json = json_data["cashAssets"]
             cash = CashAssets(
-                cash_json["cashAssets"], cash_json["savingsAcs"], cash_json["moneyMarketAccounts"],
+                cash_json["checkingAcs"], cash_json["savingsAcs"], cash_json["moneyMarketAccounts"],
                 cash_json["savingsBonds"], cash_json["cds"], cash_json["lifeInsurance"],
                 Other(cash_json["other"]["title"], cash_json["other"]["amount"])
             )
@@ -67,7 +67,7 @@ class BackendServer:
             use_json = json_data["useAssets"]
             use = UseAssets(
                 use_json["principalHome"], use_json["vacationHome"], use_json["vehicles"],
-                use_json["homeFurnishings"], use_json["artsAntiques"], use_json["jewelryFurs"],
+                use_json["homeFurnishings"], use_json["artsAndAntiques"], use_json["jewelryAndFurs"],
                 Other(use_json["other"]["title"], use_json["other"]["amount"])
             )
 
@@ -79,8 +79,8 @@ class BackendServer:
 
             long_json = json_data["longTermLiabilities"]
             long = LongTermLiabilities(
-                long_json["homeMortgage"], long_json["homeEquityLoan"], long_json["rentPropertyMortgage"],
-                long_json["carLoans"], long_json["studentLoans"], long_json["lifeInsurancePolicy"],
+                long_json["homeMortgage"], long_json["homeEquityLoan"], long_json["rentPropertiesMortgage"],
+                long_json["carLoans"], long_json["studentLoans"], long_json["lifeInsurancePolicyLoans"],
                 Other(long_json["other"]["title"], long_json["other"]["amount"])
             )
 
@@ -90,6 +90,8 @@ class BackendServer:
             store.update_user_portfolio(
                 email=email, portfolio=Portfolio(currency, cash, invested, use, current, long)
             )
+
+            return jsonify("Success")
 
         return app
 
