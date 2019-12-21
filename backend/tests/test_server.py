@@ -132,3 +132,5 @@ class TestBackendServer(unittest.TestCase):
 
         resp = requests.post(f"http://{self.host}:{self.port}/api/update_user_portfolio", json=json_data)
         self.assertEqual(resp.status_code, 200)
+
+        server.stop()
