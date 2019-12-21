@@ -93,6 +93,14 @@ class BackendServer:
 
             return jsonify("Success")
 
+        @app.route("/api/get_user")
+        def get_user():
+            # expecting query arguments "/api/get_user?email=test@gmail.com"
+            email = request.args.get("email")
+            store = InMemoryDataStore()
+            u = store.get_user(email)  # will raise an error if not found resulting in a 500
+            return jsonify(u.to_json())
+
         return app
 
     def _run_server(self):

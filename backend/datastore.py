@@ -1,3 +1,4 @@
+import copy
 import os
 import pickle
 import sys
@@ -42,6 +43,17 @@ class InMemoryDataStore:
             found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
             if found_user:
                 found_user[0].portfolio = portfolio
+            else:
+                raise ValueError(f"There is no registered user with the email: {email}")
+
+    @staticmethod
+    def get_user(email: str):
+        with InMemoryDataStore._USERS_LOCK:
+            # passed by pointer
+            found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
+            if found_user:
+                # returns a copy of the data
+                return copy.deepcopy(found_user[0])
             else:
                 raise ValueError(f"There is no registered user with the email: {email}")
 

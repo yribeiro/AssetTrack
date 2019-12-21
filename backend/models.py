@@ -215,3 +215,16 @@ class User:
             pickle.dump(self, fp)
 
         print(f"Saved user to disk as {fname}")
+
+    def to_json(self):
+        """
+        Function to create dictionary representation of the class.
+
+        :return: Dictionary version of the User class.
+        """
+        user_json = dict()
+        user_json["firstName"] = self.first_name
+        user_json["lastName"] = self.last_name
+        user_json["age"] = self.age
+        user_json["email"] = self.email
+        return user_json
