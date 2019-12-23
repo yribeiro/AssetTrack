@@ -2,7 +2,10 @@ import os
 import pickle
 import unittest
 
-import utils
+try:
+    from . import utils
+except ImportError:
+    import utils
 
 from backend.datastore import InMemoryDataStore
 from backend.models import User, Portfolio, Currencies
@@ -103,3 +106,22 @@ class TestInMemoryDataStore(unittest.TestCase):
         p.currency = Currencies.USD
         store.update_user_portfolio("john.doe@gmail.com", p)
         self.assertEqual(Currencies.USD, InMemoryDataStore._USERS[0].portfolio.currency)
+
+    def test_datastore_get_user_returns_the_right_values(self):
+        users_file = os.path.join(self.TEST_STORAGE_PATH, "users.pck")
+
+        # check for no user in database
+        with self.assertRaises(ValueError):
+            store = InMemoryDataStore()
+            store.get_user(self.TEST_USER.email)
+
+        # check the right user is returned
+        store = InMemoryDataStore(users_file)
+        u = store.get_user(self.TEST_USER.email)
+        self.assertEqual(u.first_name, self.TEST_USER.first_name)
+        self.assertEqual(u.last_name, self.TEST_USER.last_name)
+        self.assertEqual(u.age, self.TEST_USER.age)
+
+        # check that editing the user doesn't change the database user
+        u.first_name = "YuGiOh"
+        self.assertEqual(InMemoryDataStore._USERS[0].first_name, self.TEST_USER.first_name)
