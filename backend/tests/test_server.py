@@ -134,3 +134,21 @@ class TestBackendServer(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
 
         server.stop()
+
+    def test_server_get_user_endpoint(self):
+        server = BackendServer(host=self.host, port=self.port)
+        server.start()
+        time.sleep(1)  # sleep to allow server to start
+
+        # make request without email in args
+        resp = requests.get(f"http://{self.host}:{self.port}/api/get_user")
+        self.assertEqual(resp.status_code, 500)
+
+        # make request with email in args
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_user",
+            params={"email": "john.doe@gmail.com"}
+        )
+
+        self.assertEqual(resp.json()["firstName"], "John")
+        self.assertEqual(resp.json()["lastName"], "Doe")
