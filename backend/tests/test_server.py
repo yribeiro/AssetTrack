@@ -152,3 +152,5 @@ class TestBackendServer(unittest.TestCase):
 
         self.assertEqual(resp.json()["firstName"], "John")
         self.assertEqual(resp.json()["lastName"], "Doe")
+
+        server.stop()

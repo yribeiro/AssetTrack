@@ -126,12 +126,12 @@ class BackendServer:
         else:
             print("The BackendServer is already running")
 
-    def stop(self, timeout=2):
+    def stop(self, timeout=1):
         if self._thread.is_alive() and self._wsgi_server is not None:
             # kill the WSGI server and then kill the thread
             self._wsgi_server.stop(timeout=timeout)
             self._wsgi_server.close()
-            self._thread.join(timeout=timeout + 2)
+            self._thread.join(timeout=timeout + 1)
 
             # sleep to give the server time to kill requests
             time.sleep(1)
