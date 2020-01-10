@@ -47,7 +47,7 @@ class InMemoryDataStore:
                 raise ValueError(f"There is no registered user with the email: {email}")
 
     @staticmethod
-    def get_user(email: str):
+    def get_user(email: str) -> User:
         with InMemoryDataStore._USERS_LOCK:
             # passed by pointer
             found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
