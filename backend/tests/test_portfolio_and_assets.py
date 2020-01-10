@@ -42,10 +42,3 @@ class TestPortfolioAndAssetLiabilities(unittest.TestCase):
 
         self.assertEqual(self.assets, p.total_assets)
         self.assertEqual(self.liabilities, p.total_liabilities)
-
-    def test_portfolio_returns_correct_net_worth(self):
-        p = Portfolio(
-            Currencies.GBP, self.cash, self.invested, self.use, self.current, self.long
-        )
-        expected = self.assets - self.liabilities
-        self.assertEqual(expected, p.net_worth)

@@ -2,12 +2,14 @@ import os
 import pickle
 import unittest
 
+from unittest import mock
+
 try:
     from . import utils
 except ImportError:
     import utils
 
-from backend.models import User
+from backend.models import User, Portfolio
 
 
 class TestUserClass(unittest.TestCase):
@@ -52,3 +54,15 @@ class TestUserClass(unittest.TestCase):
         self.assertEqual(ujson["lastName"], u.last_name)
         self.assertEqual(ujson["age"], u.age)
         self.assertEqual(ujson["email"], u.email)
+
+    def test_user_returns_right_net_worth(self):
+        u = utils.get_test_user()
+
+        self.assertIsNone(u.net_worth)  # returns None if no portfolio is set
+
+        mock_port = mock.Mock(spec=Portfolio)
+        mock_port.total_assets = 30
+        mock_port.total_liabilities = 10
+        u.portfolio = mock_port
+
+        self.assertEqual(20, u.net_worth)

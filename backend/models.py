@@ -185,10 +185,6 @@ class Portfolio:
     def total_liabilities(self):
         return self.current_liabilities.total + self.long_term_liabilities.total
 
-    @property
-    def net_worth(self):
-        return self.total_assets - self.total_liabilities
-
 
 class User:
     """
@@ -202,6 +198,11 @@ class User:
         self.email = email
         self._id = uuid.uuid1()
         self.portfolio = None
+
+    @property
+    def net_worth(self):
+        if self.portfolio:
+            return self.portfolio.total_assets - self.portfolio.total_liabilities
 
     def save_to_disk(self, loc: str):
         """
