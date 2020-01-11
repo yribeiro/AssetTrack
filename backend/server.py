@@ -1,6 +1,7 @@
 import time
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
 from threading import Thread
 
@@ -26,6 +27,7 @@ class BackendServer:
         :return: Instance of the Flask route handling object.
         """
         app = Flask(__name__)
+        CORS(app)
 
         @app.route("/")
         def index():
