@@ -3,6 +3,8 @@ import socket
 import time
 import unittest
 
+from unittest import mock
+
 try:
     from . import utils
 except ImportError:
@@ -10,7 +12,7 @@ except ImportError:
 
 from backend.server import BackendServer
 from backend.datastore import InMemoryDataStore
-from backend.models import Currencies
+from backend.models import Currencies, Portfolio
 
 
 class TestBackendServer(unittest.TestCase):
@@ -152,5 +154,34 @@ class TestBackendServer(unittest.TestCase):
 
         self.assertEqual(resp.json()["firstName"], "John")
         self.assertEqual(resp.json()["lastName"], "Doe")
+
+        server.stop()
+
+    def test_server_get_user_net_worth_endpoint(self):
+        server = BackendServer(host=self.host, port=self.port)
+        server.start()
+        time.sleep(1)  # sleep to allow server to start
+
+        # make request with no portfolio leading to a none
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_net_worth",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNone(resp.json())
+
+        # mock portfolio
+        mock_port = mock.Mock(spec=Portfolio)
+        mock_port.total_assets = 30
+        mock_port.total_liabilities = 10
+        InMemoryDataStore().update_user_portfolio("john.doe@gmail.com", mock_port)
+
+        # test
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_net_worth",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(20, resp.json())
 
         server.stop()

@@ -107,7 +107,7 @@ class BackendServer:
             email = request.args.get("email")
             store = InMemoryDataStore()
             u = store.get_user(email)  # will raise an error if not found resulting in a 500
-            return jsonify(u.portfolio.net_worth)
+            return jsonify(u.net_worth)
 
         return app
 
