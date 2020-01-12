@@ -22,12 +22,12 @@
     <b-container class="mt-4">
       <b-row class="text-center">
         <b-col class="border-right border-secondary mr-2">
-          <h4 class="right">Your Assets</h4>
-          <pie-chart :height="300"></pie-chart>
+          <h4 class="right">Your Current Assets</h4>
+          <pie-chart :height="300" type="assets"></pie-chart>
         </b-col>
         <b-col>
-          <h4>Your Liabilities</h4>
-          <pie-chart :height="300"></pie-chart>
+          <h4>Your Current Liabilities</h4>
+          <pie-chart :height="300" type="liabilities"></pie-chart>
         </b-col>
       </b-row>
     </b-container>
