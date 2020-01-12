@@ -4,6 +4,7 @@ import pickle
 import uuid
 
 from datetime import datetime
+from typing import Union
 
 
 class Currencies(enum.Enum):
@@ -191,13 +192,13 @@ class User:
     Class to contain the details of an individual user
     """
 
-    def __init__(self, first_name: str, last_name: str, age: int, email: str):
+    def __init__(self, first_name: str, last_name: str, age: int, email: str, portfolio: Portfolio = None):
         self.first_name = first_name
         self.last_name = last_name
         self.age = age
         self.email = email
         self._id = uuid.uuid1()
-        self.portfolio = None
+        self.portfolio = portfolio
 
     @property
     def net_worth(self):

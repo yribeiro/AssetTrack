@@ -201,7 +201,10 @@ class TestBackendServer(unittest.TestCase):
             params={"email": "john.doe@gmail.com"}
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(mock_port.total_assets, resp.json())
+        resp = resp.json()
+        self.assertEqual(mock_port.cash_assets.total, resp["cash"])
+        self.assertEqual(mock_port.invested_assets.total, resp["invested"])
+        self.assertEqual(mock_port.use_assets.total, resp["use"])
 
         server.stop()
 
@@ -226,6 +229,8 @@ class TestBackendServer(unittest.TestCase):
             params={"email": "john.doe@gmail.com"}
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(mock_port.total_liabilities, resp.json())
+        resp = resp.json()
+        self.assertEqual(mock_port.current_liabilities.total, resp["current"])
+        self.assertEqual(mock_port.long_term_liabilities.total, resp["long"])
 
         server.stop()

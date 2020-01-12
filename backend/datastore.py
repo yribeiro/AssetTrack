@@ -3,7 +3,7 @@ import os
 import pickle
 import sys
 
-from typing import List, Union
+from typing import List, Union, Dict
 from threading import Lock
 
 from backend import STORAGE_PATH
@@ -58,28 +58,37 @@ class InMemoryDataStore:
                 raise ValueError(f"There is no registered user with the email: {email}")
 
     @staticmethod
-    def get_user_assets(email: str) -> Union[User, None]:
+    def get_user_assets(email: str) -> Union[Dict, None]:
         with InMemoryDataStore._USERS_LOCK:
             # passed by pointer
             found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
             if found_user:
                 if found_user[0].portfolio:
-                    # returns a copy of the data
-                    return found_user[0].portfolio.total_assets
+                    # returns a dict of the data
+                    res = {
+                        "cash": found_user[0].portfolio.cash_assets.total,
+                        "invested": found_user[0].portfolio.invested_assets.total,
+                        "use": found_user[0].portfolio.use_assets.total,
+                    }
+                    return res
                 else:
                     return None  # return None if there is no portfolio
             else:
                 raise ValueError(f"There is no registered user with the email: {email}")
 
     @staticmethod
-    def get_user_liabilities(email: str) -> Union[User, None]:
+    def get_user_liabilities(email: str) -> Union[Dict, None]:
         with InMemoryDataStore._USERS_LOCK:
             # passed by pointer
             found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
             if found_user:
                 if found_user[0].portfolio:
-                    # returns a copy of the data
-                    return found_user[0].portfolio.total_liabilities
+                    # returns a dict of the data
+                    res = {
+                        "current": found_user[0].portfolio.current_liabilities.total,
+                        "long": found_user[0].portfolio.long_term_liabilities.total
+                    }
+                    return res
                 else:
                     return None  # return None if there is no portfolio
             else:
