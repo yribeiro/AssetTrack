@@ -7,7 +7,7 @@
       <b-row class="text-center">
         <b-col cols="8" class="border border-primary mr-2">Test Chart Area</b-col>
         <b-col class="border border-primary">
-          <b-button size="lg" variant="info" id="updateButton" v-on:click="getNetWorth">Update</b-button>
+          <b-button size="lg" variant="info" id="updateButton">Update Portfolio</b-button>
           <div class="border rounded border-secondary mt-3" id="netWorth">
             <p class="mt-1">
               <b>Net Worth</b>
@@ -40,7 +40,10 @@ export default {
       currency: ""
     };
   },
-  mounted: function() {},
+  mounted: function() {
+    // run the functions
+    this.getNetWorth();
+  },
   methods: {
     getNetWorth: function() {
       // make request to the backend
@@ -54,6 +57,11 @@ export default {
                 this.currency = "£";
                 this.netWorth = resp.data.toFixed(2);
             }
+        })
+        .catch(error => {
+          // log to the console
+          console.error(error);
+          this.netWorth = "Error";
         });
     }
   }
