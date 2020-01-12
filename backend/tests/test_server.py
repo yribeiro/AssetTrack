@@ -3,8 +3,6 @@ import socket
 import time
 import unittest
 
-from unittest import mock
-
 try:
     from . import utils
 except ImportError:
@@ -16,15 +14,16 @@ from backend.models import Currencies, Portfolio
 
 
 class TestBackendServer(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
+        self.host = "localhost"
+        self.port = 50123
         # add to the datastore
         store = InMemoryDataStore()
         store.add_user("John", "Doe", 23, "john.doe@gmail.com")
 
-    def setUp(self):
-        self.host = "localhost"
-        self.port = 50123
+    def tearDown(self):
+        store = InMemoryDataStore()
+        store.clear()
 
     def test_server_startup(self):
         server = BackendServer(host=self.host, port=self.port)
@@ -62,7 +61,6 @@ class TestBackendServer(unittest.TestCase):
     def test_server_add_user_endpoint(self):
         server = BackendServer(host=self.host, port=self.port)
         server.start()
-        time.sleep(1)  # sleep to allow server to start
 
         # make a request on the add user end point as get
         resp = requests.get(f"http://{self.host}:{self.port}/api/add_user")
@@ -94,7 +92,6 @@ class TestBackendServer(unittest.TestCase):
     def test_server_update_user_portfolio_endpoint(self):
         server = BackendServer(host=self.host, port=self.port)
         server.start()
-        time.sleep(1)  # sleep to allow server to start
 
         # make a request on the end point as get
         resp = requests.get(f"http://{self.host}:{self.port}/api/update_user_portfolio")
@@ -140,7 +137,6 @@ class TestBackendServer(unittest.TestCase):
     def test_server_get_user_endpoint(self):
         server = BackendServer(host=self.host, port=self.port)
         server.start()
-        time.sleep(1)  # sleep to allow server to start
 
         # make request without email in args
         resp = requests.get(f"http://{self.host}:{self.port}/api/get_user")
@@ -160,7 +156,6 @@ class TestBackendServer(unittest.TestCase):
     def test_server_get_user_net_worth_endpoint(self):
         server = BackendServer(host=self.host, port=self.port)
         server.start()
-        time.sleep(1)  # sleep to allow server to start
 
         # make request with no portfolio leading to a none
         resp = requests.get(
@@ -171,9 +166,7 @@ class TestBackendServer(unittest.TestCase):
         self.assertIsNone(resp.json())
 
         # mock portfolio
-        mock_port = mock.Mock(spec=Portfolio)
-        mock_port.total_assets = 30
-        mock_port.total_liabilities = 10
+        mock_port = utils.get_test_portfolio()
         InMemoryDataStore().update_user_portfolio("john.doe@gmail.com", mock_port)
 
         # test
@@ -182,6 +175,57 @@ class TestBackendServer(unittest.TestCase):
             params={"email": "john.doe@gmail.com"}
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(20, resp.json())
+        self.assertEqual(mock_port.total_assets - mock_port.total_liabilities, resp.json())
+
+        server.stop()
+
+    def test_server_get_user_assets_endpoint(self):
+        server = BackendServer(host=self.host, port=self.port)
+        server.start()
+
+        # make request with no portfolio leading to a none
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_assets",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNone(resp.json())
+
+        # mock portfolio
+        mock_port = utils.get_test_portfolio()
+        InMemoryDataStore.update_user_portfolio("john.doe@gmail.com", mock_port)
+
+        # test
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_assets",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(mock_port.total_assets, resp.json())
+
+        server.stop()
+
+    def test_server_get_user_liabilities_endpoint(self):
+        server = BackendServer(host=self.host, port=self.port)
+        server.start()
+
+        # make request with no portfolio leading to a none
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_liabilities",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsNone(resp.json())
+
+        mock_port = utils.get_test_portfolio()
+        InMemoryDataStore().update_user_portfolio("john.doe@gmail.com", mock_port)
+
+        # test
+        resp = requests.get(
+            f"http://{self.host}:{self.port}/api/get_liabilities",
+            params={"email": "john.doe@gmail.com"}
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(mock_port.total_liabilities, resp.json())
 
         server.stop()

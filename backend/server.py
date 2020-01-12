@@ -116,22 +116,16 @@ class BackendServer:
             # expecting query arguments "/api/get_user?email=test@gmail.com"
             email = request.args.get("email")
             store = InMemoryDataStore()
-            u = store.get_user(email)  # will raise an error if not found resulting in a 500
-            if u.portfolio:
-                return jsonify(u.portfolio.total_assets)
-            else:
-                return jsonify(u.portfolio)  # return none if no portfolio
+            assets = store.get_user_assets(email)  # will raise an error if not found resulting in a 500
+            return jsonify(assets)
 
         @app.route("/api/get_liabilities")
         def get_liabilities():
             # expecting query arguments "/api/get_user?email=test@gmail.com"
             email = request.args.get("email")
             store = InMemoryDataStore()
-            u = store.get_user(email)  # will raise an error if not found resulting in a 500
-            if u.portfolio:
-                return jsonify(u.portfolio.total_liabilities)
-            else:
-                return jsonify(u.portfolio)  # return none if no portfolio
+            liabilities = store.get_user_liabilities(email)  # will raise an error if not found resulting in a 500
+            return jsonify(liabilities)
 
         return app
 

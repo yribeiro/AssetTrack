@@ -3,7 +3,7 @@ import os
 import pickle
 import sys
 
-from typing import List
+from typing import List, Union
 from threading import Lock
 
 from backend import STORAGE_PATH
@@ -54,6 +54,34 @@ class InMemoryDataStore:
             if found_user:
                 # returns a copy of the data
                 return copy.deepcopy(found_user[0])
+            else:
+                raise ValueError(f"There is no registered user with the email: {email}")
+
+    @staticmethod
+    def get_user_assets(email: str) -> Union[User, None]:
+        with InMemoryDataStore._USERS_LOCK:
+            # passed by pointer
+            found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
+            if found_user:
+                if found_user[0].portfolio:
+                    # returns a copy of the data
+                    return found_user[0].portfolio.total_assets
+                else:
+                    return None  # return None if there is no portfolio
+            else:
+                raise ValueError(f"There is no registered user with the email: {email}")
+
+    @staticmethod
+    def get_user_liabilities(email: str) -> Union[User, None]:
+        with InMemoryDataStore._USERS_LOCK:
+            # passed by pointer
+            found_user = list(filter(lambda user: user.email == email, InMemoryDataStore._USERS))
+            if found_user:
+                if found_user[0].portfolio:
+                    # returns a copy of the data
+                    return found_user[0].portfolio.total_liabilities
+                else:
+                    return None  # return None if there is no portfolio
             else:
                 raise ValueError(f"There is no registered user with the email: {email}")
 

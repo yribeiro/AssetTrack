@@ -1,10 +1,14 @@
-from backend.models import CashAssets, UseAssets, Other, User
+from backend.models import CashAssets, UseAssets, Other, User, Currencies
 from backend.models import InvestedAssets, CurrentLiabilities, LongTermLiabilities
+from backend.models import Portfolio
+
+from typing import Tuple
 
 
-def get_test_assets_and_liabilities():
+def get_test_assets_and_liabilities() -> Tuple[CashAssets, UseAssets,
+                                               InvestedAssets, CurrentLiabilities, LongTermLiabilities]:
     """
-    Utility function ti generate assets and liability data.
+    Utility function to generate assets and liability data.
     :return: Tuple(CashAssets, UseAssets, InvestedAssets, CurrentLiabilities, LongTermLiabilities)
     """
     cash = CashAssets(1, 2, 3, 4, 5, 6, Other("Test", 7))
@@ -28,6 +32,18 @@ def get_test_user():
     age = 25
     email = "yohahnribeiro29@gmail.com"
     return User(fname, lname, age, email)
+
+
+def get_test_portfolio() -> Portfolio:
+    """
+    Function to return a populated instance of Portfolio() with GBP
+    :return: new Portfolio()
+    """
+    cash, use, invested, current, long = get_test_assets_and_liabilities()
+    p = Portfolio(
+        Currencies.GBP, cash, invested, use, current, long
+    )
+    return p
 
 
 def to_camel_case(snake_str):
