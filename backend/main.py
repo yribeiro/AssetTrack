@@ -23,7 +23,7 @@ if __name__ == "__main__":
             1.5, Other("TestInvest", 2.5), 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,
             11.5, 12.5, 13.5, 14.5, 15.5, Other("TestInvest", 16.5)
         )
-        current = CurrentLiabilities(0, 1.1, Other("TestCurrent", 1.3))
+        current = CurrentLiabilities(0, 111.1, Other("TestCurrent", 21.3))
         long = LongTermLiabilities(10, 20, 30, 40, 50, 60, Other(amount=70))
 
         p = Portfolio(Currencies.GBP, cash, invested, use, current, long)
