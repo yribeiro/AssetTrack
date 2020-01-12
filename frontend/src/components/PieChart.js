@@ -17,7 +17,8 @@ export default {
       },
       chartOptions: {
         responsive: true,
-        cutoutPercentage: 40
+        cutoutPercentage: 40,
+        maintainAspectRatio: false
       }
     };
   },
