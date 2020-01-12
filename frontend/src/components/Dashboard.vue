@@ -19,7 +19,9 @@
     </b-container>
     <b-container class="mt-3">
       <b-row class="text-center">
-        <b-col class="border border-primary mr-2">Pie Chart Area 1</b-col>
+        <b-col class="border border-primary mr-2">
+          <pie-chart></pie-chart>
+        </b-col>
         <b-col class="border border-primary">Pie Chart Area 2</b-col>
       </b-row>
     </b-container>
@@ -28,9 +30,11 @@
 
 <script>
 import axios from "axios";
+import PieChart from "./PieChart.js"
 
 export default {
   name: "Dashboard",
+  components: {PieChart},
   props: {
     msg: String
   },
